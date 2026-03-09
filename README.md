@@ -250,6 +250,27 @@ PaperIQ provides outputs such as:
 
 ---
 
+# Contributing
+
+```bash
+# get latest changes 
+git pull origin main 
+
+# make your changes 
+git add . 
+
+git commit -m "short description" 
+
+# push to branch/main 
+git push origin main
+```
+
+> [!NOTE] 
+> Open a Pull Request
+> Create a PR from your branch to the `main` branch of this repository.
+
+---
+
 # 📜 License
 
 This project is intended for **educational and research purposes**.
