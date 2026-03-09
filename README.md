@@ -54,4 +54,8 @@ It helps users extract summaries, key insights, domain detection, and sentiment 
 
 ## 👩‍💻 Developed By
 
+<<<<<<< HEAD
 Vrashali Kodgire
+=======
+Vrashali Kodgire
+>>>>>>> db3a8fd851d4b3bf12a2b8d23de77071413771b9
