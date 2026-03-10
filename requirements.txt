@@ -1,0 +1,12 @@
+streamlit
+numpy
+pdfplumber
+python-docx
+textblob
+plotly
+wheel
+fpdf
+scikit-learn
+pandas
+matplotlib
+kaleido
