@@ -9,6 +9,14 @@ import pdfplumber
 import plotly.graph_objects as go
 import streamlit as st
 from fpdf import FPDF
+<<<<<<< Updated upstream
+=======
+import heapq
+from collections import Counter
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+from sklearn.metrics.pairwise import cosine_similarity
+>>>>>>> Stashed changes
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from textblob import TextBlob
@@ -31,6 +39,7 @@ def generate_research_feedback(results):
     if not feedback:
         feedback.append("Paper demonstrates strong academic quality.")
     return feedback
+<<<<<<< Updated upstream
 
 
 def detect_research_gaps_advanced(sections):
@@ -78,6 +87,8 @@ def internal_redundancy_check(text):
     return round(similarity_matrix.mean() * 100, 2)
 
 
+=======
+>>>>>>> Stashed changes
 def recommend_journal(domain):
     journal_map = {
         "Engineering": "IEEE Transactions",
@@ -431,6 +442,7 @@ def clean_for_pdf(text):
 
 
 def generate_pdf_report(res, filename):
+<<<<<<< Updated upstream
     categories = ["Language", "Coherence", "Reasoning", "Sophistication", "Readability"]
     values = [res["scores"][c] for c in categories]
     fig = go.Figure()
@@ -440,6 +452,8 @@ def generate_pdf_report(res, filename):
 
     chart_path = f"chart_{uuid.uuid4().hex}.png"
     fig.write_image(chart_path, format="png", scale=1)
+=======
+>>>>>>> Stashed changes
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=10)
     pdf.add_page()
@@ -456,7 +470,6 @@ def generate_pdf_report(res, filename):
     for k, v in res["scores"].items():
         pdf.multi_cell(0, 8, f"{k}: {v}")
     pdf.ln(5)
-    pdf.image(chart_path, x=10, w=180)
     pdf.ln(10)
     pdf.cell(0, 10, "Section Summaries:", ln=True)
     for title, summary in res["sections"].items():
@@ -807,15 +820,19 @@ if uploaded_files:
                         results["domain"] = domain
                         results["publisher"] = publisher
                         results["full_text"] = cleaned_text
+<<<<<<< Updated upstream
                         results["research_gaps"] = detect_research_gaps_advanced(
                             results["sections"]
                         )
+=======
+>>>>>>> Stashed changes
                         results["citation_analysis"] = analyze_citations(cleaned_text)
                         results["semantic_strength"] = calculate_semantic_strength(
                             cleaned_text
                         )
                         results["topic_focus"] = extract_topic_focus(cleaned_text)
                         results["ai_feedback"] = generate_research_feedback(results)
+<<<<<<< Updated upstream
                         results["recommended_journal"] = recommend_journal(
                             results["domain"]
                         )
@@ -825,6 +842,9 @@ if uploaded_files:
                         results["redundancy_score"] = internal_redundancy_check(
                             results["full_text"]
                         )
+=======
+                        results["recommended_journal"] = recommend_journal(results["domain"])
+>>>>>>> Stashed changes
                         results["novelty_score"] = novelty_score(cleaned_text)
                         st.session_state.comparison_results.append(results)
                         st.session_state["results"] = results
@@ -951,12 +971,17 @@ if "results" in st.session_state:
         for point in res["ai_feedback"]:
             st.write("•", point)
         st.success(f"📚 Recommended Journal: {res['recommended_journal']}")
+<<<<<<< Updated upstream
         st.subheader("🧬 Key Contributions")
         for c in res["contributions"]:
             st.write("•", c)
         st.info(f"📎 Internal Redundancy Score: {res['redundancy_score']}%")
         st.markdown(
             f"""
+=======
+        
+        st.markdown(f"""
+>>>>>>> Stashed changes
         <div class="summary-box">
             {suggestion_html}
         </div>
@@ -977,6 +1002,7 @@ if "results" in st.session_state:
         st.subheader("Reviewer Simulation")
         st.write(reviewer_comments(res["scores"]["Composite"]))
     with tab6:
+<<<<<<< Updated upstream
         st.subheader("📌 Extracted Keywords")
         keyword_html = " ".join(
             [
@@ -1003,6 +1029,17 @@ if "results" in st.session_state:
         st.markdown("---")
         st.subheader("📚 Detected Domain")
         st.success(res["domain"])
+=======
+        st.subheader("📚 Detected Domain")
+        st.success(res['domain'])
+        keywords = res['keywords']
+        text_for_cloud = " ".join(keywords)
+        wc = WordCloud(width=1000, height=400, background_color="white").generate(text_for_cloud)
+        fig, ax = plt.subplots()
+        ax.imshow(wc)
+        ax.axis("off")
+        st.pyplot(fig)
+>>>>>>> Stashed changes
     with tab7:
         st.subheader("🤖 Ask About This Paper")
         user_question = st.text_input(
@@ -1046,14 +1083,6 @@ if "results" in st.session_state:
                 st.markdown("---")
     with tab9:
         st.subheader("🧠 Advanced AI Insights")
-        st.markdown("### 🔍 Research Gaps Detected")
-        gaps = res.get("research_gaps", [])
-        if gaps:
-            for gap in gaps:
-                st.markdown(f"- {gap}")
-        else:
-            st.success("No major research gaps explicitly detected.")
-        st.markdown("---")
         citation_data = res.get("citation_analysis", {})
         st.markdown("### 📚 Citation Analysis")
         st.metric("Total Citations Found", citation_data.get("total_citations", 0))
