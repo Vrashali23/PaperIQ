@@ -1,7 +1,6 @@
 import heapq
 import re
 from collections import Counter
-
 import docx
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,20 +8,11 @@ import pdfplumber
 import plotly.graph_objects as go
 import streamlit as st
 from fpdf import FPDF
-<<<<<<< Updated upstream
-=======
-import heapq
-from collections import Counter
-from wordcloud import WordCloud
-import matplotlib.pyplot as plt
-from sklearn.metrics.pairwise import cosine_similarity
->>>>>>> Stashed changes
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from textblob import TextBlob
 from wordcloud import WordCloud
-
-
+import pandas as pd
 def generate_research_feedback(results):
     feedback = []
     score = results.get("scores", {}).get("Composite", 0)
@@ -39,56 +29,7 @@ def generate_research_feedback(results):
     if not feedback:
         feedback.append("Paper demonstrates strong academic quality.")
     return feedback
-<<<<<<< Updated upstream
 
-
-def detect_research_gaps_advanced(sections):
-    gap_keywords = [
-        "however",
-        "future work",
-        "limitation",
-        "challenge",
-        "lack",
-        "needs improvement",
-        "not addressed",
-        "further research",
-    ]
-    relevant_sections = ["conclusion", "discussion", "future work"]
-    gaps = []
-    for sec_name, content in sections.items():
-        if sec_name.lower() in relevant_sections:
-            sentences = content.split(".")
-            for sentence in sentences:
-                if any(keyword in sentence.lower() for keyword in gap_keywords):
-                    gaps.append(sentence.strip())
-    return gaps[:5]
-
-
-def detect_contribution(text):
-    keywords = ["proposed", "novel", "new method", "we introduce", "our contribution"]
-    sentences = text.split(".")
-    contributions = []
-    for sentence in sentences:
-        if any(k in sentence.lower() for k in keywords):
-            contributions.append(sentence.strip())
-    return contributions[:5]
-
-
-def internal_redundancy_check(text):
-    from sklearn.feature_extraction.text import TfidfVectorizer
-    from sklearn.metrics.pairwise import cosine_similarity
-
-    paragraphs = text.split("\n\n")
-    if len(paragraphs) < 2:
-        return 0
-    vectorizer = TfidfVectorizer(stop_words="english")
-    vectors = vectorizer.fit_transform(paragraphs)
-    similarity_matrix = cosine_similarity(vectors)
-    return round(similarity_matrix.mean() * 100, 2)
-
-
-=======
->>>>>>> Stashed changes
 def recommend_journal(domain):
     journal_map = {
         "Engineering": "IEEE Transactions",
@@ -97,8 +38,6 @@ def recommend_journal(domain):
         "Legal": "Journal of Legal Analytics",
     }
     return journal_map.get(domain, "Scopus Indexed Multidisciplinary Journal")
-
-
 st.set_page_config(page_title="PaperIQ", layout="wide")
 st.markdown(
     """
@@ -136,8 +75,6 @@ if not st.session_state.signed_up:
         else:
             st.error("Please fill all fields.")
     st.stop()
-
-
 def extract_text_from_pdf(file):
     text = ""
     with pdfplumber.open(file) as pdf:
@@ -146,17 +83,11 @@ def extract_text_from_pdf(file):
             if extracted:
                 text += extracted + "\n"
     return text
-
-
 def extract_text_from_docx(file):
     doc = docx.Document(file)
     return "\n".join([para.text for para in doc.paragraphs])
-
-
 def clean_text(text):
     return re.sub(r"\n+", "\n", text).strip()
-
-
 def extract_sections(text):
     lines = text.split("\n")
     sections = {}
@@ -197,8 +128,6 @@ def extract_sections(text):
     if current_content:
         sections[current_header] = " ".join(current_content)
     return sections
-
-
 def summarize_text(text, num_sentences=3):
     if not text:
         return "No content to summarize."
@@ -208,8 +137,7 @@ def summarize_text(text, num_sentences=3):
         return text
     word_frequencies = {}
     stop_words = set(
-        [
-            "the",
+        ["the",
             "is",
             "in",
             "and",
@@ -229,9 +157,7 @@ def summarize_text(text, num_sentences=3):
             "an",
             "be",
             "are",
-            "was",
-        ]
-    )
+            "was",])
     for word in blob.words:
         word = word.lower()
         if word not in stop_words and word.isalpha():
@@ -253,8 +179,6 @@ def summarize_text(text, num_sentences=3):
         num_sentences, sentence_scores, key=sentence_scores.get
     )
     return " ".join([str(s) for s in top_sentences])
-
-
 def get_important_sentences(text, num_sentences=3):
     sentences = re.split(r"(?<=[.!?]) +", text)
     if len(sentences) <= num_sentences:
@@ -272,8 +196,6 @@ def get_important_sentences(text, num_sentences=3):
                 )
     important = heapq.nlargest(num_sentences, sentence_scores, key=sentence_scores.get)
     return important
-
-
 def count_syllables(word):
     word = word.lower()
     vowels = "aeiou"
@@ -288,8 +210,6 @@ def count_syllables(word):
     if count == 0:
         count += 1
     return count
-
-
 def calculate_readability(text):
     sentences = re.split(r"[.!?]+", text)
     words = text.split()
@@ -304,8 +224,6 @@ def calculate_readability(text):
         - (84.6 * (syllables / total_words))
     )
     return round(flesch_score, 2)
-
-
 def get_grade(score):
     if score >= 85:
         return "A"
@@ -317,8 +235,6 @@ def get_grade(score):
         return "D"
     else:
         return "E"
-
-
 def analyze_full_document(text):
     blob = TextBlob(text)
     sentences = blob.sentences
@@ -331,16 +247,14 @@ def analyze_full_document(text):
     avg_word_len = np.mean([len(w) for w in words])
     sentiment = blob.sentiment.polarity
     language_score = min(
-        100, (avg_sentence_len * 1.5) + (avg_word_len * 5) + (50 + sentiment * 20)
-    )
+        100, (avg_sentence_len * 1.5) + (avg_word_len * 5) + (50 + sentiment * 20))
     transitions = [
         "however",
         "therefore",
         "thus",
         "consequently",
         "furthermore",
-        "meanwhile",
-    ]
+        "meanwhile",]
     transition_count = sum(text.lower().count(t) for t in transitions)
     coherence_score = min(100, (transition_count * 4) + (sentence_count * 0.1) + 40)
     reasoning_keywords = [
@@ -349,22 +263,19 @@ def analyze_full_document(text):
         "implies",
         "due to",
         "as a result",
-        "evidence",
-    ]
+        "evidence",]
     reasoning_count = sum(text.lower().count(k) for k in reasoning_keywords)
     reasoning_score = min(100, (reasoning_count * 6) + 30)
     complex_words = [w for w in words if len(w) > 6]
     lexical_score = (
-        min(100, (len(complex_words) / word_count) * 300) if word_count else 0
-    )
+        min(100, (len(complex_words) / word_count) * 300) if word_count else 0)
     readability_score = calculate_readability(text)
     final_score = (
         language_score * 0.3
         + coherence_score * 0.2
         + reasoning_score * 0.2
         + lexical_score * 0.15
-        + readability_score * 0.15
-    )
+        + readability_score * 0.15)
     stats = {
         "word_count": word_count,
         "sentence_count": sentence_count,
@@ -375,8 +286,7 @@ def analyze_full_document(text):
         else 0,
         "complex_word_ratio": round(len(complex_words) / word_count, 2)
         if word_count
-        else 0,
-    }
+        else 0,}
     sections_data = extract_sections(text)
     return {
         "scores": {
@@ -392,8 +302,6 @@ def analyze_full_document(text):
         "blob": blob,
         "sections": sections_data,
     }
-
-
 def generate_full_report(res, filename):
     scores = res["scores"]
     stats = res["stats"]
@@ -439,21 +347,7 @@ def clean_for_pdf(text):
     if not text:
         return ""
     return text.encode("latin-1", "ignore").decode("latin-1")
-
-
 def generate_pdf_report(res, filename):
-<<<<<<< Updated upstream
-    categories = ["Language", "Coherence", "Reasoning", "Sophistication", "Readability"]
-    values = [res["scores"][c] for c in categories]
-    fig = go.Figure()
-    fig.add_trace(go.Bar(x=categories, y=values, text=values, textposition="auto"))
-    fig.update_layout(height=400)
-    import uuid
-
-    chart_path = f"chart_{uuid.uuid4().hex}.png"
-    fig.write_image(chart_path, format="png", scale=1)
-=======
->>>>>>> Stashed changes
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=10)
     pdf.add_page()
@@ -480,13 +374,10 @@ def generate_pdf_report(res, filename):
         pdf.ln(3)
     pdf_output = pdf.output(dest="S")
     return bytes(pdf_output, "latin-1")
-
-
 def extract_keywords_and_domain(text, top_n=15):
     blob = TextBlob(text)
     stop_words = set(
-        [
-            "the",
+        ["the",
             "is",
             "in",
             "and",
@@ -521,8 +412,7 @@ def extract_keywords_and_domain(text, top_n=15):
         "Healthcare": ["patient", "medical", "treatment", "disease", "clinical"],
         "Finance": ["market", "investment", "economic", "revenue", "financial"],
         "Education": ["learning", "students", "teaching", "curriculum"],
-        "Engineering": ["system", "design", "performance", "analysis"],
-    }
+        "Engineering": ["system", "design", "performance", "analysis"],}
     detected_domain = "General"
     for domain, terms in domains.items():
         for term in terms:
@@ -530,8 +420,6 @@ def extract_keywords_and_domain(text, top_n=15):
                 detected_domain = domain
                 break
     return keywords, detected_domain
-
-
 def reviewer_comments(score):
     if score > 80:
         return "Strong paper. Minor revisions recommended."
@@ -539,8 +427,6 @@ def reviewer_comments(score):
         return "Good work, but clarity and structure need improvement."
     else:
         return "Major revisions required before acceptance."
-
-
 def semantic_answer(question, full_text, sections):
     question = question.lower()
     section_keywords = {
@@ -551,8 +437,7 @@ def semantic_answer(question, full_text, sections):
         "methodology": "Methodology",
         "results": "Results",
         "discussion": "Discussion",
-        "conclusion": "Conclusion",
-    }
+        "conclusion": "Conclusion",}
     for key, section_name in section_keywords.items():
         if key in question:
             for title, content in sections.items():
@@ -564,65 +449,33 @@ def semantic_answer(question, full_text, sections):
     cosine_sim = cosine_similarity([vectors[-1]], vectors[:-1])[0]
     best_match_index = np.argmax(cosine_sim)
     return sentences[best_match_index]
-
-
 STOPWORDS = set(
-    [
-        "the",
-        "is",
-        "in",
-        "and",
-        "to",
-        "of",
-        "for",
-        "on",
-        "with",
-        "a",
-        "an",
-        "by",
-        "this",
-        "that",
-        "it",
-        "as",
-        "are",
-        "was",
-    ]
-)
-
-
+    ["the","is","in","and","to","of","a","an","by","this","that","it","as","are","was",])
 def detect_repetition(text, threshold=5):
     words = re.findall(r"\b[a-zA-Z]{4,}\b", text.lower())
     words = [w for w in words if w not in STOPWORDS]
     word_counts = Counter(words)
     repeated = {
-        word: count for word, count in word_counts.items() if count >= threshold
-    }
+        word: count for word, count in word_counts.items() if count >= threshold}
     return repeated
-
-
 def generate_structured_suggestions(text):
     suggestions = []
     sentences = re.split(r"[.!?]", text)
     long_sentences = [s for s in sentences if len(s.split()) > 30]
     if long_sentences:
         suggestions.append(
-            "• Consider breaking long sentences into shorter ones for clarity."
-        )
+            "• Consider breaking long sentences into shorter ones for clarity.")
     repeated_words = detect_repetition(text)
     if repeated_words:
         suggestions.append(
             "• Reduce repetition of words like: "
-            + ", ".join(list(repeated_words.keys())[:5])
-        )
+            + ", ".join(list(repeated_words.keys())[:5]))
     if " was " in text or " were " in text:
         suggestions.append("• Review passive voice usage for stronger academic tone.")
     if not suggestions:
         suggestions.append(
-            "• Writing structure looks good. Minor refinements may improve clarity."
-        )
+            "• Writing structure looks good. Minor refinements may improve clarity.")
     return suggestions
-
-
 def detect_publisher(text):
     publishers = {
         "IEEE": ["ieee", "ieeexplore"],
@@ -633,30 +486,23 @@ def detect_publisher(text):
         "ACM": ["acm", "association for computing machinery"],
         "Nature": ["nature publishing"],
         "MDPI": ["mdpi"],
-        "Oxford University Press": ["oxford university press"],
-    }
+        "Oxford University Press": ["oxford university press"],}
     text_lower = text.lower()
     for publisher, keywords in publishers.items():
         for word in keywords:
             if word in text_lower:
                 return publisher
     return "Not Detected"
-
-
 def section_wise_sentiment(sections):
     sentiment_results = {}
     blob = TextBlob(full_text)
     overall_sentiment = blob.sentiment.polarity
     return sentiment_results
-
-
 def novelty_score(text):
     words = re.findall(r"\b\w+\b", text.lower())
     if not words:
         return 0
     return round((len(set(words)) / len(words)) * 100, 2)
-
-
 def analyze_citations(text):
     citation_patterns = [r"\(\d{4}\)", r"\[\d+\]", r"\(\w+ et al\., \d{4}\)"]
     citation_count = 0
@@ -674,10 +520,7 @@ def analyze_citations(text):
         "total_citations": citation_count,
         "citation_density": citation_density,
         "impact_score": impact_score,
-        "average_year": round(avg_year, 1),
-    }
-
-
+        "average_year": round(avg_year, 1),}
 def calculate_semantic_strength(text):
     blob = TextBlob(text)
     nouns = [word.lower() for word, tag in blob.tags if tag.startswith("NN")]
@@ -686,15 +529,10 @@ def calculate_semantic_strength(text):
     if total_nouns == 0:
         return 0
     return round(min(100, (unique_nouns / total_nouns) * 150), 2)
-
-
 def extract_topic_focus(text):
     keywords, _ = extract_keywords_and_domain(text, top_n=15)
     return keywords
-
-
-st.markdown(
-    """
+st.markdown("""
 <style>
 .stApp {
     background: linear-gradient(135deg, #f4f6fb, #eef1f7);
@@ -783,9 +621,7 @@ hr {
     background: #e0e0e0;
     margin: 20px 0;}
 </style>
-""",
-    unsafe_allow_html=True,
-)
+""",unsafe_allow_html=True,)
 with st.sidebar:
     st.markdown("User Dashboard")
     st.write(f"👤 {st.session_state.user_data['username']}")
@@ -820,44 +656,21 @@ if uploaded_files:
                         results["domain"] = domain
                         results["publisher"] = publisher
                         results["full_text"] = cleaned_text
-<<<<<<< Updated upstream
-                        results["research_gaps"] = detect_research_gaps_advanced(
-                            results["sections"]
-                        )
-=======
->>>>>>> Stashed changes
                         results["citation_analysis"] = analyze_citations(cleaned_text)
-                        results["semantic_strength"] = calculate_semantic_strength(
-                            cleaned_text
-                        )
+                        results["semantic_strength"] = calculate_semantic_strength(cleaned_text)
                         results["topic_focus"] = extract_topic_focus(cleaned_text)
                         results["ai_feedback"] = generate_research_feedback(results)
-<<<<<<< Updated upstream
-                        results["recommended_journal"] = recommend_journal(
-                            results["domain"]
-                        )
-                        results["contributions"] = detect_contribution(
-                            results["full_text"]
-                        )
-                        results["redundancy_score"] = internal_redundancy_check(
-                            results["full_text"]
-                        )
-=======
                         results["recommended_journal"] = recommend_journal(results["domain"])
->>>>>>> Stashed changes
                         results["novelty_score"] = novelty_score(cleaned_text)
                         st.session_state.comparison_results.append(results)
                         st.session_state["results"] = results
                         st.session_state["filename"] = file.name
                         pdf_bytes = generate_pdf_report(results, file.name)
                         st.session_state.analysis_history[username].append(
-                            {
-                                "filename": file.name,
+                            {"filename": file.name,
                                 "domain": domain,
                                 "score": results["scores"]["Composite"],
-                                "pdf": pdf_bytes,
-                            }
-                        )
+                                "pdf": pdf_bytes,})
                 else:
                     st.error(f"Unable to analyze file: {file.name}")
 if "results" in st.session_state:
@@ -883,10 +696,8 @@ if "results" in st.session_state:
             "Download Full Report",
             data=pdf_report,
             file_name="PaperIQ_Report.pdf",
-            mime="application/pdf",
-        )
-    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs(
-        [
+            mime="application/pdf",)
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
             "📊 Visualizations",
             "📑 Section Summaries",
             "📄 Metadata",
@@ -896,9 +707,7 @@ if "results" in st.session_state:
             "Chatbot",
             "📂 Analysis History",
             "🧠 Advanced Insights",
-            "📊 Paper Comparison",
-        ]
-    )
+            "📊 Paper Comparison",])
     with tab1:
         st.subheader("📊 Performance Breakdown")
         categories = [
@@ -906,8 +715,7 @@ if "results" in st.session_state:
             "Coherence",
             "Reasoning",
             "Sophistication",
-            "Readability",
-        ]
+            "Readability",]
         values = [scores[c] for c in categories]
         fig = go.Figure()
         fig.add_trace(go.Bar(x=categories, y=values, text=values, textposition="auto"))
@@ -915,8 +723,7 @@ if "results" in st.session_state:
             title="Score Distribution (Out of 100)",
             yaxis=dict(title="Score", range=[0, 100]),
             xaxis=dict(title="Metrics"),
-            height=400,
-        )
+            height=400,)
         st.plotly_chart(fig, use_container_width=True)
         st.markdown("---")
         st.subheader("📘 What These Scores Mean")
@@ -925,13 +732,11 @@ if "results" in st.session_state:
         **Coherence** → Logical flow and transitions
         **Reasoning** → Use of arguments and evidence
         **Sophistication** → Vocabulary complexity
-        **Readability** → Ease of reading
-        """)
+        **Readability** → Ease of reading""")
     with tab2:
         st.subheader("📑 Smart Section Summaries")
         summary_length = st.radio(
-            "Select Summary Length", ["Short", "Medium", "Long"], horizontal=True
-        )
+            "Select Summary Length", ["Short", "Medium", "Long"], horizontal=True)
         if summary_length == "Short":
             num_sentences = 3
             highlight_sentences = 1
@@ -948,8 +753,7 @@ if "results" in st.session_state:
             highlighted_summary = summary
             for sent in important_sentences:
                 highlighted_summary = highlighted_summary.replace(
-                    sent, f"<mark>{sent}</mark>"
-                )
+                    sent, f"<mark>{sent}</mark>")
             st.markdown(
                 f"""
                 <div class="summary-box">
@@ -957,8 +761,7 @@ if "results" in st.session_state:
                 {highlighted_summary}
                 </div>
                 """,
-                unsafe_allow_html=True,
-            )
+                unsafe_allow_html=True,)
     with tab3:
         st.write(f"**Publisher:** {res['publisher']}")
         st.write(f"**File Name:** {st.session_state['filename']}")
@@ -971,23 +774,11 @@ if "results" in st.session_state:
         for point in res["ai_feedback"]:
             st.write("•", point)
         st.success(f"📚 Recommended Journal: {res['recommended_journal']}")
-<<<<<<< Updated upstream
-        st.subheader("🧬 Key Contributions")
-        for c in res["contributions"]:
-            st.write("•", c)
-        st.info(f"📎 Internal Redundancy Score: {res['redundancy_score']}%")
-        st.markdown(
-            f"""
-=======
-        
         st.markdown(f"""
->>>>>>> Stashed changes
         <div class="summary-box">
             {suggestion_html}
         </div>
-        """,
-            unsafe_allow_html=True,
-        )
+        """,unsafe_allow_html=True,)
     with tab5:
         st.subheader("📊 Overall Paper Sentiment")
         sentiment_score = res["sentiment"]
@@ -1002,34 +793,6 @@ if "results" in st.session_state:
         st.subheader("Reviewer Simulation")
         st.write(reviewer_comments(res["scores"]["Composite"]))
     with tab6:
-<<<<<<< Updated upstream
-        st.subheader("📌 Extracted Keywords")
-        keyword_html = " ".join(
-            [
-                f"<span style='background-color:#d9d9d9; padding:6px 10px; margin:5px; border-radius:15px; display:inline-block;'>{kw}</span>"
-                for kw in res["keywords"]
-            ]
-        )
-        st.markdown(keyword_html, unsafe_allow_html=True)
-
-        st.subheader("☁️ Keyword Word Cloud")
-        if res.get("keywords"):
-            keyword_text = " ".join(res["keywords"])
-            wc = WordCloud(
-                width=1200, height=500, background_color="white", colormap="viridis"
-            ).generate(keyword_text)
-
-            fig, ax = plt.subplots(figsize=(12, 5))
-            ax.imshow(wc, interpolation="bilinear")
-            ax.axis("off")
-            st.pyplot(fig)
-        else:
-            st.info("No keywords available to generate word cloud.")
-
-        st.markdown("---")
-        st.subheader("📚 Detected Domain")
-        st.success(res["domain"])
-=======
         st.subheader("📚 Detected Domain")
         st.success(res['domain'])
         keywords = res['keywords']
@@ -1039,12 +802,10 @@ if "results" in st.session_state:
         ax.imshow(wc)
         ax.axis("off")
         st.pyplot(fig)
->>>>>>> Stashed changes
     with tab7:
         st.subheader("🤖 Ask About This Paper")
         user_question = st.text_input(
-            "Ask a question about the paper", key="paper_chatbot_input"
-        )
+            "Ask a question about the paper", key="paper_chatbot_input")
         if user_question:
             answer = semantic_answer(user_question, res["full_text"], res["sections"])
             st.markdown(
@@ -1053,8 +814,7 @@ if "results" in st.session_state:
             <b>Answer:</b> {answer}
             </div>
             """,
-                unsafe_allow_html=True,
-            )
+                unsafe_allow_html=True,)
     with tab8:
         st.subheader("📂 Your Analysis History")
         username = st.session_state.user_data["username"]
@@ -1074,8 +834,7 @@ if "results" in st.session_state:
                         data=item["pdf"],
                         file_name=f"{item['filename']}_Report.pdf",
                         mime="application/pdf",
-                        key=f"download_{i}",
-                    )
+                        key=f"download_{i}",)
                 with col2:
                     if st.button("🗑 Delete", key=f"delete_{i}"):
                         st.session_state.analysis_history[username].pop(i)
@@ -1096,21 +855,17 @@ if "results" in st.session_state:
         st.metric("Novelty Score", f"{res.get('novelty_score', 0)}%")
     with tab10:
         st.subheader("📊 Advanced Paper Comparison")
-        if (
-            "comparison_results" not in st.session_state
-            or len(st.session_state.comparison_results) < 2
-        ):
+        if ("comparison_results" not in st.session_state
+            or len(st.session_state.comparison_results) < 2):
             st.warning("Please upload at least 2 papers for comparison.")
         else:
             import matplotlib.pyplot as plt
             import pandas as pd
             from sklearn.feature_extraction.text import TfidfVectorizer
             from sklearn.metrics.pairwise import cosine_similarity
-
             papers = st.session_state.comparison_results
             max_score = max(
-                paper.get("scores", {}).get("Composite", 0) for paper in papers
-            )
+                paper.get("scores", {}).get("Composite", 0) for paper in papers)
             comparison_data = []
             for i, paper in enumerate(papers):
                 citation_data = paper.get("citation_analysis", {})
@@ -1119,8 +874,7 @@ if "results" in st.session_state:
                     or citation_data.get("citation_count")
                     or citation_data.get("count")
                     or citation_data.get("citations")
-                    or 0
-                )
+                    or 0)
                 composite_score = paper.get("scores", {}).get("Composite", 0)
                 comparison_data.append(
                     {
@@ -1129,14 +883,11 @@ if "results" in st.session_state:
                         "Composite Score": composite_score,
                         "Semantic Strength": paper.get("semantic_strength", 0),
                         "Total Citations": total_citations,
-                        "Best Paper": "⭐" if composite_score == max_score else "",
-                    }
-                )
+                        "Best Paper": "⭐" if composite_score == max_score else "",})
             df = pd.DataFrame(comparison_data)
             st.dataframe(df, use_container_width=True)
             best_paper = max(
-                papers, key=lambda x: x.get("scores", {}).get("Composite", 0)
-            )
+                papers, key=lambda x: x.get("scores", {}).get("Composite", 0))
             try:
                 if len(papers) >= 2:
                     texts = [paper.get("full_text", "") for paper in papers]
@@ -1144,13 +895,10 @@ if "results" in st.session_state:
                     tfidf_matrix = vectorizer.fit_transform(texts)
                     similarity_matrix = cosine_similarity(tfidf_matrix)
                     st.subheader("📊 Similarity Matrix (%)")
-                    import pandas as pd
-
                     similarity_df = pd.DataFrame(
                         similarity_matrix * 100,
                         columns=[f"Paper {i + 1}" for i in range(len(papers))],
-                        index=[f"Paper {i + 1}" for i in range(len(papers))],
-                    )
+                        index=[f"Paper {i + 1}" for i in range(len(papers))],)
                     st.dataframe(similarity_df.round(2))
             except:
                 st.warning("Similarity calculation unavailable.")
