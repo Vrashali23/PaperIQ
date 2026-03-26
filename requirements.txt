@@ -11,3 +11,4 @@ pandas
 matplotlib
 kaleido
 wordcloud
+seaborn
