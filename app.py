@@ -616,13 +616,11 @@ with st.sidebar:
     st.markdown("User Dashboard")
     st.write(f"👤 {st.session_state.user_data['username']}")
     st.write(f"🎓 Role: {st.session_state.user_data['role']}")
-
+    st.markdown("---")
     if st.sidebar.button("Logout"):
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.rerun()
-    st.divider()
-
 if "analysis_history" not in st.session_state:
     st.session_state.analysis_history = {}
 if "comparison_results" not in st.session_state:
@@ -672,13 +670,18 @@ if uploaded_files:
                         )
                 else:
                     st.error(f"Unable to analyze file: {file.name}")
-
-
 if "results" in st.session_state:
     res = st.session_state["results"]
     scores = res["scores"]
     stats = res["stats"]
-
+    st.markdown("## 📈 Analysis Results")
+    grade = get_grade(scores["Composite"])
+    col_main1, col_main2 = st.columns([2, 1])
+    with col_main1:
+        st.metric("Composite Score", f"{scores['Composite']}/100")
+    with col_main2:
+        st.metric("Overall Grade", grade)
+        st.markdown("---")
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Language", f"{scores['Language']}/100")
     col2.metric("Coherence", f"{scores['Coherence']}/100")
@@ -692,145 +695,22 @@ if "results" in st.session_state:
             file_name="PaperIQ_Report.pdf",
             mime="application/pdf",
         )
-if "results" not in st.session_state:
-    st.info("Upload and analyze a paper to unlock features.")
-    st.stop()
-
-
-# ---------------- NAVIGATION ----------------
-st.sidebar.markdown("## Navigation")
-
-if "page" not in st.session_state:
-    st.session_state.page = "Overview"
-
-# 🔹 Main Sections (Reduced to 5)
-if st.sidebar.button("Overview", width="stretch"):
-    st.session_state.page = "Overview"
-
-if st.sidebar.button("Analysis", width="stretch"):
-    st.session_state.page = "Analysis"
-
-if st.sidebar.button("Content Insights", width="stretch"):
-    st.session_state.page = "Content"
-
-if st.sidebar.button("Chatbot", width="stretch"):
-    st.session_state.page = "AI"
-
-if st.sidebar.button("Workspace", width="stretch"):
-    st.session_state.page = "Workspace"
-
-
-# ---------------- LOAD RESULTS ----------------
-if "results" in st.session_state:
-    res = st.session_state["results"]
-    scores = res["scores"]
-    stats = res["stats"]
-
-
-# ---------------- PAGE RENDERING ----------------
-
-# 📄 OVERVIEW
-if st.session_state.page == "Overview":
-    st.header("📄 Overview")
-
-    # ---------------- SCORE BREAKDOWN ----------------
-    st.markdown("### 📊 Score Breakdown")
-
-    col1, col2, col3, col4 = st.columns(4)
-
-    col1.metric("Language", f"{scores['Language']}")
-    col2.metric("Coherence", f"{scores['Coherence']}")
-    col3.metric("Reasoning", f"{scores['Reasoning']}")
-    col4.metric("Sophistication", f"{scores['Sophistication']}")
-
-    st.markdown("")
-
-    col5, _ = st.columns([1, 3])
-    col5.metric("Readability", f"{scores['Readability']}")
-
-    st.divider()
-
-    # ---------------- METADATA ----------------
-    st.markdown("### 📄 Paper Details")
-
-    # 🔍 Publisher detection (simple heuristic)
-    text_sample = res.get("full_text", "")[:1000].lower()
-
-    publisher = "Unknown"
-
-    publisher = detect_publisher(res.get("full_text", ""))
-    st.write(f"**Publisher:** {publisher}")
-    st.write(f"**Domain:** {res['domain']}")
-    st.write(f"**Word Count:** {stats['word_count']}")
-    st.write(f"**Sentence Count:** {stats['sentence_count']}")
-
-    st.divider()
-
-    # ---------------- WORD CLOUD ----------------
-    st.markdown("### ☁️ Key Concepts")
-
-    text = res.get("full_text", "")
-
-    if not text or len(text.strip()) == 0:
-        st.warning("No text available to generate word cloud.")
-
-    else:
-        # 🔥 Reduce clutter: limit text + filter small words
-        words = text.split()
-        filtered_words = [w for w in words if len(w) > 4]
-
-        reduced_text = " ".join(filtered_words[:1000])  # limit words
-
-        try:
-            wordcloud = WordCloud(
-                width=800,
-                height=400,
-                background_color="white",
-                max_words=50,  # 🔥 LIMIT WORDS
-                colormap="viridis",
-            ).generate(reduced_text)
-
-            fig, ax = plt.subplots(figsize=(10, 5))
-            ax.imshow(wordcloud, interpolation="bilinear")
-            ax.axis("off")
-
-            st.pyplot(fig)
-
-        except Exception as e:
-            st.error(f"WordCloud error: {e}")
-
-# 📊 ANALYSIS
-elif st.session_state.page == "Analysis":
-    st.header("📊 Analysis")
-
-    # ---------------- TOP METRICS ----------------
-    st.markdown("### 📈 Overall Performance")
-
-    grade = get_grade(scores["Composite"])
-
-    col1, col2, col3 = st.columns(3)
-
-    col1.metric("Composite Score", f"{scores['Composite']}/100")
-    col2.metric("Grade", grade)
-    col3.metric("Sentiment", res["sentiment"])
-
-    # optional feedback
-    if grade == "A":
-        st.success("Excellent paper quality")
-    elif grade == "B":
-        st.info("Good paper with minor improvements")
-    else:
-        st.warning("Needs improvement")
-
-    st.divider()
-
-    # ---------------- VISUALS (SIDE BY SIDE) ----------------
-    st.markdown("### 📊 Performance Overview")
-
-    col1, col2 = st.columns([2, 1])  # radar bigger, gauge smaller
-
-    # 🔵 Radar Chart
-    with col1:
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs(
+        [
+            "📊 Visualizations",
+            "📑 Section Summaries",
+            "📄 Metadata",
+            "💡 Suggestions",
+            "❤️ Sentiment",
+            "📌 Keywords & Domain",
+            "Chatbot",
+            "📂 Analysis History",
+            "🧠 Advanced Insights",
+            "📊 Paper Comparison",
+        ]
+    )
+    with tab1:
+        st.subheader("📊 Performance Breakdown")
         categories = [
             "Language",
             "Coherence",
@@ -838,130 +718,217 @@ elif st.session_state.page == "Analysis":
             "Sophistication",
             "Readability",
         ]
-
         values = [scores[c] for c in categories]
-
-        categories_closed = categories + [categories[0]]
-        values_closed = values + [values[0]]
-
         fig = go.Figure()
-
-        fig.add_trace(
-            go.Scatterpolar(
-                r=values_closed,
-                theta=categories_closed,
-                fill="toself",
-                name="Your Paper",
-            )
-        )
-
-        ideal = [85, 85, 85, 85, 85]
-        ideal_closed = ideal + [ideal[0]]
-
-        fig.add_trace(
-            go.Scatterpolar(
-                r=ideal_closed,
-                theta=categories_closed,
-                line=dict(dash="dash"),
-                name="Ideal",
-            )
-        )
-
+        fig.add_trace(go.Bar(x=categories, y=values, text=values, textposition="auto"))
         fig.update_layout(
-            polar=dict(radialaxis=dict(visible=True, range=[0, 100])), height=420
+            title="Score Distribution (Out of 100)",
+            yaxis=dict(title="Score", range=[0, 100]),
+            xaxis=dict(title="Metrics"),
+            height=400,
         )
-
         st.plotly_chart(fig, use_container_width=True)
-
-    # 🟣 Gauge Chart
-    with col2:
-        fig = go.Figure(
-            go.Indicator(
-                mode="gauge+number",
-                value=scores["Composite"],
-                title={"text": "Quality"},
-                gauge={
-                    "axis": {"range": [0, 100]},
-                    "bar": {"color": "darkblue"},
-                },
-            )
-        )
-
-        fig.update_layout(height=420)
-
-        st.plotly_chart(fig, use_container_width=True)
-
-    st.divider()
-
-    # ---------------- SCORE BREAKDOWN ----------------
-    st.markdown("### 📊 Detailed Scores")
-
-    col1, col2, col3, col4 = st.columns(4)
-
-    col1.metric("Language", scores["Language"])
-    col2.metric("Coherence", scores["Coherence"])
-    col3.metric("Reasoning", scores["Reasoning"])
-    col4.metric("Sophistication", scores["Sophistication"])
-
-    st.markdown("")
-
-    col5, _ = st.columns([1, 3])
-    col5.metric("Readability", scores["Readability"])
-
-    st.divider()
-
-    # ---------------- INSIGHTS ----------------
-    st.markdown("### 🧠 Insights")
-
-    col1, col2 = st.columns(2)
-
-    col1.metric("Semantic Strength", f"{res.get('semantic_strength', 0)}/100")
-    col2.metric("Sentence Count", stats["sentence_count"])
-
-
-# 📑 CONTENT INSIGHTS
-elif st.session_state.page == "Content":
-    st.header("📑 Content Insights")
-
-    tab1, tab2 = st.tabs(["📑 Section Summaries", "💡 Suggestions"])
-
-    # 📑 Summaries Tab
-    with tab1:
-        for title, content in res["sections"].items():
-            summary = summarize_text(content, 5)
-            st.write(f"**{title}**")
-            st.write(summary)
-            st.divider()
-
-    # 💡 Suggestions Tab
+        st.markdown("---")
+        st.subheader("📘 What These Scores Mean")
+        st.markdown("""
+        **Language** → Sentence quality and structure
+        **Coherence** → Logical flow and transitions
+        **Reasoning** → Use of arguments and evidence
+        **Sophistication** → Vocabulary complexity
+        **Readability** → Ease of reading""")
     with tab2:
+        st.subheader("📑 Smart Section Summaries")
+        summary_length = st.radio(
+            "Select Summary Length", ["Short", "Medium", "Long"], horizontal=True
+        )
+        if summary_length == "Short":
+            num_sentences = 3
+            highlight_sentences = 1
+        elif summary_length == "Medium":
+            num_sentences = 6
+            highlight_sentences = 3
+        else:
+            num_sentences = 8
+            highlight_sentences = 4
+        for title, content in res["sections"].items():
+            summary = summarize_text(content, num_sentences)
+            summary_sentences = re.split(r"(?<=[.!?]) +", summary)
+            important_sentences = get_important_sentences(summary, highlight_sentences)
+            highlighted_summary = summary
+            for sent in important_sentences:
+                highlighted_summary = highlighted_summary.replace(
+                    sent, f"<mark>{sent}</mark>"
+                )
+            st.markdown(
+                f"""
+                <div class="summary-box">
+                <b>{title}</b><br><br>
+                {highlighted_summary}
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+    with tab3:
+        st.write(f"**Publisher:** {res['publisher']}")
+        st.write(f"**File Name:** {st.session_state['filename']}")
+        st.write(f"**Words:** {stats['word_count']}")
+        st.write(f"**Sentences:** {stats['sentence_count']}")
+    with tab4:
+        st.subheader("💡 Writing Suggestions")
+        suggestions = generate_structured_suggestions(res["full_text"])
+        suggestion_html = "<br>".join(suggestions)
         for point in res["ai_feedback"]:
             st.write("•", point)
-
-# 🤖 AI TOOLS
-elif st.session_state.page == "AI":
-    st.header("🤖 AI Tools")
-
-    user_question = st.text_input("Ask a question about the paper")
-
-    if user_question:
-        answer = semantic_answer(user_question, res["full_text"], res["sections"])
-        st.write(answer)
-
-
-# 📂 WORKSPACE
-elif st.session_state.page == "Workspace":
-    st.header("📂 Workspace")
-
-    with st.expander("📂 History", expanded=True):
-        username = st.session_state.user_data["username"]
-        history = st.session_state.analysis_history.get(username, [])
-
-        if not history:
-            st.info("No history available")
+        st.success(f"📚 Recommended Journal: {res['recommended_journal']}")
+        st.markdown(
+            f"""
+        <div class="summary-box">
+            {suggestion_html}
+        </div>
+        """,
+            unsafe_allow_html=True,
+        )
+    with tab5:
+        st.subheader("📊 Overall Paper Sentiment")
+        sentiment_score = res["sentiment"]
+        if sentiment_score > 0:
+            label = "Positive"
+        elif sentiment_score < 0:
+            label = "Negative"
         else:
-            for item in history:
-                st.write(item["filename"], "-", item["score"])
+            label = "Neutral"
+        st.metric("Sentiment Score", sentiment_score)
+        st.success(f"Overall Tone: {label}")
+        st.subheader("Reviewer Simulation")
+        st.write(reviewer_comments(res["scores"]["Composite"]))
+    with tab6:
+        st.subheader("📚 Detected Domain")
+        st.success(res["domain"])
+        keywords = res["keywords"]
+        text_for_cloud = " ".join(keywords)
+        wc = WordCloud(width=1000, height=400, background_color="white").generate(
+            text_for_cloud
+        )
+        fig, ax = plt.subplots()
+        ax.imshow(wc)
+        ax.axis("off")
+        st.pyplot(fig)
+    with tab7:
+        st.subheader("🤖 Ask About This Paper")
+        user_question = st.text_input(
+            "Ask a question about the paper", key="paper_chatbot_input"
+        )
+        if user_question:
+            answer = semantic_answer(user_question, res["full_text"], res["sections"])
+            st.markdown(
+                f"""
+            <div class="summary-box">
+            <b>Answer:</b> {answer}
+            </div>
+            """,
+                unsafe_allow_html=True,
+            )
+    with tab8:
+        st.subheader("📂 Your Analysis History")
+        username = st.session_state.user_data["username"]
+        user_history = st.session_state.analysis_history.get(username, [])
+        if not user_history:
+            st.info("No previous analyses found.")
+        else:
+            for i, item in enumerate(user_history):
+                st.write(f"📄 {item['filename']}")
+                st.write(f"**Domain:** {item['domain']}")
+                st.write(f"**Composite Score:** {item['score']}")
+                st.divider()
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.download_button(
+                        "⬇ Re-download Report",
+                        data=item["pdf"],
+                        file_name=f"{item['filename']}_Report.pdf",
+                        mime="application/pdf",
+                        key=f"download_{i}",
+                    )
+                with col2:
+                    if st.button("🗑 Delete", key=f"delete_{i}"):
+                        st.session_state.analysis_history[username].pop(i)
+                        st.rerun()
+                st.markdown("---")
+    with tab9:
+        st.subheader("🧠 Advanced AI Insights")
+        citation_data = res.get("citation_analysis", {})
+        st.markdown("### 📚 Citation Analysis")
+        st.metric("Total Citations Found", citation_data.get("total_citations", 0))
+        st.metric("Impact Score", citation_data.get("impact_score", 0))
+        st.metric("Average Citation Year", citation_data.get("average_year", 0))
+        st.markdown("---")
+        st.markdown("### 🧠 Semantic Depth Score")
+        st.metric("Semantic Strength", f"{res.get('semantic_strength', 0)}/100")
+        st.metric("Citation Density", citation_data.get("citation_density", 0))
+        st.markdown("---")
+        st.metric("Novelty Score", f"{res.get('novelty_score', 0)}%")
+    with tab10:
+        st.subheader("📊 Advanced Paper Comparison")
+        if (
+            "comparison_results" not in st.session_state
+            or len(st.session_state.comparison_results) < 2
+        ):
+            st.warning("Please upload at least 2 papers for comparison.")
+        else:
+            import matplotlib.pyplot as plt
+            import pandas as pd
+            from sklearn.feature_extraction.text import TfidfVectorizer
+            from sklearn.metrics.pairwise import cosine_similarity
 
-    with st.expander("📊 Comparison"):
-        st.write("Comparison section here")
+            papers = st.session_state.comparison_results
+            max_score = max(
+                paper.get("scores", {}).get("Composite", 0) for paper in papers
+            )
+            comparison_data = []
+            for i, paper in enumerate(papers):
+                citation_data = paper.get("citation_analysis", {})
+                total_citations = (
+                    citation_data.get("total_citations")
+                    or citation_data.get("citation_count")
+                    or citation_data.get("count")
+                    or citation_data.get("citations")
+                    or 0
+                )
+                composite_score = paper.get("scores", {}).get("Composite", 0)
+                comparison_data.append(
+                    {
+                        "Paper": f"Paper {i + 1}",
+                        "Domain": paper.get("domain", "N/A"),
+                        "Composite Score": composite_score,
+                        "Semantic Strength": paper.get("semantic_strength", 0),
+                        "Total Citations": total_citations,
+                        "Best Paper": "⭐" if composite_score == max_score else "",
+                    }
+                )
+            df = pd.DataFrame(comparison_data)
+            st.dataframe(df, use_container_width=True)
+            best_paper = max(
+                papers, key=lambda x: x.get("scores", {}).get("Composite", 0)
+            )
+            try:
+                if len(papers) >= 2:
+                    texts = [paper.get("full_text", "") for paper in papers]
+                    vectorizer = TfidfVectorizer(stop_words="english")
+                    tfidf_matrix = vectorizer.fit_transform(texts)
+                    similarity_matrix = cosine_similarity(tfidf_matrix)
+                    st.subheader("📊 Similarity Matrix (%)")
+                    similarity_df = pd.DataFrame(
+                        similarity_matrix * 100,
+                        columns=[f"Paper {i + 1}" for i in range(len(papers))],
+                        index=[f"Paper {i + 1}" for i in range(len(papers))],
+                    )
+                    st.dataframe(similarity_df.round(2))
+            except:
+                st.warning("Similarity calculation unavailable.")
+            scores = [paper.get("scores", {}).get("Composite", 0) for paper in papers]
+            labels = [f"Paper {i + 1}" for i in range(len(scores))]
+            plt.figure()
+            plt.bar(labels, scores)
+            plt.xlabel("Papers")
+            plt.ylabel("Composite Score")
+            st.pyplot(plt)
